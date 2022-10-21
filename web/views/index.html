@@ -1,0 +1,46 @@
+<html>
+  <head>
+    <title>ERC20 Faucet</title>
+    <style>
+      html, body {
+        background-color: #e3e3e3;
+        padding: 20px;
+      }
+      .container {
+        width: 500px;
+        margin: 0 auto;
+        margin-top: 40px;
+      }
+      .container h1 {
+        text-align: center;
+      }
+      .container input[type="text"] {
+        width: 100%;
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid #adadad;
+      }
+      .container input[type="submit"] {
+        margin-top: 10px;
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        text-transform: uppercase;
+        background-color: black;
+        color: #e1e1e1;
+        cursor: pointer;
+        border-radius: 10px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>ERC20 Faucet - VenvetCoin</h1>
+      <form method="POST" action="/faucet">
+        <input type="text" placeholder="Your Address" name="address" required />
+        <input type="submit" name="submit" value="Request Tokens" />
+      </form>
+    </div>
+  </body>
+</html>
