@@ -9,6 +9,19 @@ type tokensMap struct {
 	rw *sync.RWMutex
 }
 
+func (t *tokensMap) exists(v string) bool {
+	t.rw.RLock()
+	_, ex := t.m[v]
+	t.rw.RUnlock()
+	return ex
+}
+
+func (t *tokensMap) add(v string) {
+	t.rw.Lock()
+	t.m[v] = false
+	t.rw.Unlock()
+}
+
 func (t *tokensMap) retrievePending() []string {
 	t.rw.RLock()
 

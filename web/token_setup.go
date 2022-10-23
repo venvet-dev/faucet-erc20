@@ -8,6 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"math/big"
 	"sync"
+	"time"
 )
 
 var (
@@ -28,7 +29,14 @@ func setupTokenContract(addr string, client *ethclient.Client) (*Token, error) {
 }
 
 // Execute the faucet token giveaway goroutine
-func runTokenFaucet(token *Token, priv *privateKey) {
+func runTokenFaucet(client *ethclient.Client, priv *privateKey, token *Token) {
+	ticker := time.NewTicker(time.Minute * 3)
+	for _ = range ticker.C {
+		if err := executeTokenFaucetTick(client, priv, token); err != nil {
+			fmt.Printf("Unable to handle executeTokenFaucetTick: %v", err)
+			continue
+		}
+	}
 }
 
 func executeTokenFaucetTick(client *ethclient.Client, priv *privateKey, token *Token) error {
@@ -45,6 +53,8 @@ func executeTokenFaucetTick(client *ethclient.Client, priv *privateKey, token *T
 		token.Transfer(opts, common.HexToAddress(addr), tokensAmountToGive)
 
 		// Mark entry as done
+		tokensGiveawayMap.markAsDone(addr)
+		opts.Nonce.Add(opts.Nonce, big.NewInt(1))
 	}
 	return nil
 }
