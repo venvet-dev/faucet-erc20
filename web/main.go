@@ -16,6 +16,8 @@ func main() {
 		return
 	}
 
+	go startFaucet()
+
 	http.HandleFunc("/", errorHandler(tpl, showFaucetPage))
 	http.HandleFunc("/faucet", errorHandler(tpl, handleFaucetRequest))
 
@@ -42,4 +44,36 @@ func errorHandler(tpl *template.Template, f httpHandlerFunc) http.HandlerFunc {
 			w.Write([]byte(err.Error()))
 		}
 	}
+}
+
+const (
+	nodeURL         = "http://localhost:8545"
+	contractAddress = ""
+	privateKeyStr   = ""
+)
+
+func startFaucet() {
+	// Create ethclient
+	client, err := setupEthClient(nodeURL)
+	if err != nil {
+		fmt.Printf("Unable to connect to node: %v\n", err)
+		return
+	}
+
+	// Create contract object
+	tokenContract, err := setupTokenContract(contractAddress, client)
+	if err != nil {
+		fmt.Printf("Unable to create contract object: %v\n", err)
+		return
+	}
+
+	// Parse private key
+	priv, err := parsePrivateKey(privateKeyStr)
+	if err != nil {
+		fmt.Printf("Unable to parse private key: %v\n", err)
+		return
+	}
+
+	// Start Faucet
+	runTokenFaucet(client, priv, tokenContract)
 }

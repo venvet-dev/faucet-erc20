@@ -41,6 +41,9 @@ func runTokenFaucet(client *ethclient.Client, priv *privateKey, token *Token) {
 
 func executeTokenFaucetTick(client *ethclient.Client, priv *privateKey, token *Token) error {
 	pending := tokensGiveawayMap.retrievePending()
+	if len(pending) <= 0 {
+		return nil
+	}
 
 	// Retrieve transaction opts
 	opts, _, err := prepareContractWrite(client, 300000, priv)
@@ -48,13 +51,25 @@ func executeTokenFaucetTick(client *ethclient.Client, priv *privateKey, token *T
 		return err
 	}
 
+	tokenDecimals, err := token.Decimals(&bind.CallOpts{})
+	if err != nil {
+		return err
+	}
+	tokenDecimalsAmount := big.NewInt(1).Exp(big.NewInt(10), big.NewInt(int64(tokenDecimals)), nil)
+	amountToGive := tokensAmountToGive.Mul(tokensAmountToGive, tokenDecimalsAmount)
+
 	// Send tokens to all the pending entries and update them
 	for _, addr := range pending {
-		token.Transfer(opts, common.HexToAddress(addr), tokensAmountToGive)
+		if _, err := token.Transfer(opts, common.HexToAddress(addr), amountToGive); err != nil {
+			fmt.Printf("Unable to transfer tokens: %v\n", err)
+			continue
+		}
 
 		// Mark entry as done
 		tokensGiveawayMap.markAsDone(addr)
 		opts.Nonce.Add(opts.Nonce, big.NewInt(1))
+
+		fmt.Println("Sent tokens to:", addr)
 	}
 	return nil
 }
