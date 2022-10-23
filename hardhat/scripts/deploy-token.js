@@ -1,5 +1,5 @@
 const hre = require("hardhat");
-const totalSupply = 100000;
+const totalSupply = 10000000;
 
 async function main() {
   const factory = await hre.ethers.getContractFactory("VenvetCoin");
